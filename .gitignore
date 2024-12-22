@@ -169,3 +169,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# dataset
+Dataset
+weather
+map-info
+/final_dataset.csv
