@@ -2,9 +2,10 @@ from pydantic import BaseModel, Field
 import pandas as pd
 from darts import TimeSeries
 from darts.models import ARIMA, RNNModel
-from darts.dataprocessing.transformers import Scaler
 from sklearn.model_selection import TimeSeriesSplit
+# from darts.utils.timeseries_generation import split_series
 import os
+
 
 class ModelConfig(BaseModel):
     forecast_horizon: int = Field(..., description="Forecasting horizon in hours")
@@ -13,142 +14,101 @@ class ModelConfig(BaseModel):
     model_name: str = Field(..., description="Name of the model")
     output_dir: str = Field(..., description="Directory to save CSV outputs")
 
-class BaseModelExecutor(BaseModel):
-    config: ModelConfig
-    dataset: pd.DataFrame
 
-    def preprocess_data(self):
-        raise NotImplementedError("Must implement preprocess_data method.")
+def preprocess_data(dataset: pd.DataFrame):
+    """
+    Preprocess the dataset into a Darts TimeSeries object.
+    """
+    return TimeSeries.from_dataframe(dataset, "timestamp", "Actual Load [MW]")
 
-    def train_and_forecast(self):
-        raise NotImplementedError("Must implement train_and_forecast method.")
 
-    def save_forecast(self, forecasts):
-        os.makedirs(self.config.output_dir, exist_ok=True)
-        output_path = os.path.join(self.config.output_dir, f"{self.config.model_name}_forecasts.csv")
-        forecasts.to_csv(output_path, index=False)
-        print(f"Forecasts saved to {output_path}")
+def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
+    """
+    Train an ARIMA model and forecast based on the provided dataset and configuration.
+    """
+    series = preprocess_data(dataset)
+    forecasts = []
+    tscv =  TimeSeriesSplit(n_splits=config.n_splits)
 
-class ARIMAExecutor(BaseModelExecutor):
+     # Convert TimeSeries to a Pandas DataFrame for compatibility with TimeSeriesSplit
+    series_df = series.pd_dataframe()
 
-    def preprocess_data(self):
-        return TimeSeries.from_dataframe(self.dataset, "timestamp", "load")
-
-    def train_and_forecast(self):
-        series = self.preprocess_data()
-        forecasts = []
-        tscv = TimeSeriesSplit(n_splits=self.config.n_splits)
-        
-        for train_idx, test_idx in tscv.split(series):
-            train, test = series[train_idx], series[test_idx]
+    for train_idx, test_idx in tscv.split(series):
+    # for i in range(config.n_splits):
+        # train, test = split_series(series, config.forecast_horizon)
+        # train, test = series[train_idx], series[test_idx]
+        train = TimeSeries.from_dataframe(series_df.iloc[train_idx])
+        test = TimeSeries.from_dataframe(series_df.iloc[test_idx])
+         # Dynamically select the model name
+        if config.model_name == "ARIMA":
             model = ARIMA()
-            model.fit(train)
-            forecast = model.predict(self.config.forecast_horizon)
-            forecasts.append(forecast.pd_series())
-        
-        self.save_forecast(pd.concat(forecasts, axis=1))
-
-class RNNExecutor(BaseModelExecutor):
-    model_type: str
-
-    def preprocess_data(self):
-        series = TimeSeries.from_dataframe(self.dataset, "timestamp", "load")
-        covariates = TimeSeries.from_dataframe(self.dataset, "timestamp", ["temp", "time_feature"])
-        scaler = Scaler()
-        return scaler.fit_transform(series), scaler.fit_transform(covariates)
-
-    def train_and_forecast(self):
-        series, covariates = self.preprocess_data()
-        forecasts = []
-        tscv = TimeSeriesSplit(n_splits=self.config.n_splits)
-
-        for train_idx, test_idx in tscv.split(series):
-            train, test = series[train_idx], series[test_idx]
-            cov_train, cov_test = covariates[train_idx], covariates[test_idx]
-
+        elif config.model_name == "LSTM":
             model = RNNModel(
-                model=self.model_type,
-                input_chunk_length=self.config.training_horizon,
-                output_chunk_length=self.config.forecast_horizon,
+                model=config.model_name,
+                input_chunk_length=config.training_horizon,
+                output_chunk_length=config.forecast_horizon,
                 n_epochs=100,
                 random_state=42
             )
-            model.fit(train, past_covariates=cov_train)
-            forecast = model.predict(self.config.forecast_horizon, past_covariates=cov_test)
-            forecasts.append(forecast.pd_series())
-
-        self.save_forecast(pd.concat(forecasts, axis=1))
-
-class HCNNExecutor(RNNExecutor):
-
-    def train_and_forecast(self):
-        series, covariates = self.preprocess_data()
-        forecasts = []
-        tscv = TimeSeriesSplit(n_splits=self.config.n_splits)
-
-        for train_idx, test_idx in tscv.split(series):
-            train, test = series[train_idx], series[test_idx]
-            cov_train, cov_test = covariates[train_idx], covariates[test_idx]
-
+        elif config.model_name == "BiLSTM":
             model = RNNModel(
-                model="TCN",
-                input_chunk_length=self.config.training_horizon,
-                output_chunk_length=self.config.forecast_horizon,
+                model=config.model_name,
+                input_chunk_length=config.training_horizon,
+                output_chunk_length=config.forecast_horizon,
                 n_epochs=100,
                 random_state=42,
-                kernel_size=3,
-                num_filters=32,
-                dropout=0.2
+                bidirectional=True  # enable bidirectional LSTM
             )
-            model.fit(train, past_covariates=cov_train)
-            forecast = model.predict(self.config.forecast_horizon, past_covariates=cov_test)
-            forecasts.append(forecast.pd_series())
-
-        self.save_forecast(pd.concat(forecasts, axis=1))
-
-class CRCNNExecutor(RNNExecutor):
-
-    def train_and_forecast(self):
-        series, covariates = self.preprocess_data()
-        forecasts = []
-        tscv = TimeSeriesSplit(n_splits=self.config.n_splits)
-
-        for train_idx, test_idx in tscv.split(series):
-            train, test = series[train_idx], series[test_idx]
-            cov_train, cov_test = covariates[train_idx], covariates[test_idx]
-
+        elif config.model_name == "HCNN":
             model = RNNModel(
-                model="LSTM",
-                input_chunk_length=self.config.training_horizon,
-                output_chunk_length=self.config.forecast_horizon,
+                model=config.model_name,
+                input_chunk_length=config.training_horizon,
+                output_chunk_length=config.forecast_horizon,
                 n_epochs=100,
                 random_state=42,
-                kernel_size=3,
-                num_filters=16,
-                dropout=0.3
+                bidirectional=True  # enable bidirectional LSTM
             )
-            model.fit(train, past_covariates=cov_train)
-            forecast = model.predict(self.config.forecast_horizon, past_covariates=cov_test)
-            forecasts.append(forecast.pd_series())
+        elif config.model_name == "CRCNN":
+            model = RNNModel(
+                model=config.model_name,
+                input_chunk_length=config.training_horizon,
+                output_chunk_length=config.forecast_horizon,
+                n_epochs=100,
+                random_state=42,
+                bidirectional=True  # enable bidirectional LSTM
+            )
+        else:
+            raise ValueError(f"Unsupported model name: {config.model_name}")
+        model.fit(train)
+        forecast = model.predict(config.forecast_horizon)
+        forecasts.append(forecast.pd_series())
+    
+    save_forecast(pd.concat(forecasts, axis=1), config)
 
-        self.save_forecast(pd.concat(forecasts, axis=1))
+
+def save_forecast(forecasts: pd.DataFrame, config: ModelConfig):
+    """
+    Save the forecast results to a CSV file.
+    """
+    os.makedirs(config.output_dir, exist_ok=True)
+    output_path = os.path.join(config.output_dir, f"{config.model_name}_forecasts.csv")
+    forecasts.to_csv(output_path, index=False)
+    print(f"Forecasts saved to {output_path}")
+
 
 # main.py file example
 if __name__ == "__main__":
     # Load dataset
-    dataset = pd.read_csv("data/electrical_load.csv")
+    dataset = pd.read_csv("Enriched_data.csv")
     
     # Define ARIMA Configuration
     arima_config = ModelConfig(
         forecast_horizon=24,
         training_horizon=720,
-        n_splits=50,
-        model_name="ARIMA",
+        n_splits=5,
+        model_name="ARIMA", #"LSTM", "BiLSTM", "HCNN", "CRCNN"
         output_dir="outputs"
     )
 
     # Execute ARIMA Model
-    arima_executor = ARIMAExecutor(config=arima_config, dataset=dataset)
-    arima_executor.train_and_forecast()
-
-    # Add similar executors for LSTM, HCNN, CRCNN, and BiLSTM here
+    train_and_forecast(dataset=dataset, config=arima_config)
