@@ -175,3 +175,8 @@ Dataset
 weather
 map-info
 /final_dataset.csv
+
+# files
+CRCNN.py
+HCNN.py
+bin.ipynb
