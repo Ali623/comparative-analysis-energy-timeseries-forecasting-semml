@@ -1,0 +1,133 @@
+import numpy as np
+import pandas as pd
+from pydantic import BaseModel, Field
+import matplotlib.pyplot as plt
+from matplotlib import colors as mcolors
+import seaborn as sns
+color = sns.color_palette()
+sns.set_style('darkgrid')
+from hcnn.hcnn.hcnn import HCNN
+from hcnn.hcnn.loss_functions import LogCosh
+import torch
+import os
+from datetime import datetime, timedelta
+
+class ModelConfig(BaseModel):
+    forecast_horizon: int = Field(..., description="Forecasting horizon in hours")
+    training_horizon: int = Field(..., description="Training horizon in hours")
+    n_splits: int = Field(..., description="Number of train-test splits")
+    model_name: str = Field(..., description="Name of the model")
+    output_dir: str = Field(..., description="Directory to save CSV outputs")
+
+
+def preprocess_data(dataset: pd.DataFrame, config: ModelConfig, iteration : int):
+
+    df = dataset[["timestamp", "Actual Load [MW]"]].copy()
+    # df.set_index("timestamp", inplace = True)
+
+    start_index = df.shape[0] - config.training_horizon - config.forecast_horizon - iteration * config.forecast_horizon
+    end_index = start_index + config.training_horizon + config.forecast_horizon
+    start_datetime = df["timestamp"].iloc[start_index - 1] 
+    end_datetime = df["timestamp"].iloc[end_index - 1]
+    df.drop("timestamp", axis = 1,  inplace = True)
+
+    df.index = range(0, len(df))
+    df = df[start_index : end_index]
+    max, min = df.max(), df.min()
+    df = (df - min)/(max - min)
+
+    data_train = df[: config.training_horizon]
+    test = df[config.training_horizon :]
+
+    df = pd.DataFrame(df)
+    data_train = pd.DataFrame(data_train)
+    test = pd.DataFrame(test)
+    
+    return df, data_train, test, max, min, start_datetime, end_datetime
+
+
+
+def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
+    """
+    Train a model and forecast based on the provided dataset and configuration.
+    """
+    # df = dataset["Actual Load [MW]"].copy()
+
+    combined_forecast = pd.DataFrame()
+
+    for i in reversed(range(config.n_splits)):
+
+        df, data_train, test, max, min, start_datetime, end_datetime = preprocess_data(dataset, config, iteration = i)
+
+        hcnn = HCNN(data_dim=data_train.shape[1], hidden_dim=200, sparsity=0, init_state_trainable=False)
+        init_state = hcnn.init_state()
+
+        train_loss = hcnn.train(
+            data_train.values, 
+            init_state, 
+            lr=0.0005, epochs=1000, 
+            criterion=torch.nn.MSELoss(), #LogCosh.apply, 
+            plot_pred_train=False
+        )
+
+        y_pred_test = hcnn.sample(hcnn.forward(init_state, len(data_train)), len(test))
+        y_pred = hcnn.sample(init_state, len(data_train))
+
+        y_pred_test = pd.DataFrame(data=y_pred_test, columns=df.columns)#.rename('forecast from the end of train'])
+        y_pred_test.index = df.loc[data_train.index[-1]+1:].index
+        df_forecast_test = diff_inverse_transform(y_pred_test, df.loc[[data_train.index[-1]]])
+        df_forecast_test.rename(columns={'Actual Load [MW]': 'forecast'}, inplace=True)
+        
+        # Generate the timestamp column with 1-hour resolution
+        # Convert the string to a datetime object
+        end_datetime = datetime.strptime(end_datetime, "%Y-%m-%d %H:%M:%S")
+        timestamps = pd.date_range(start=end_datetime, end=end_datetime + timedelta(hours=23) , freq='h')
+        df_forecast_test["timestamp"] = timestamps
+
+        combined_forecast = pd.concat([combined_forecast, df_forecast_test], ignore_index=True)
+
+    # Save the forecasts
+    save_forecast(combined_forecast[["timestamp","forecast"]], config)
+
+def save_forecast(forecasts: pd.DataFrame, config: ModelConfig):
+    """
+    Save the forecast results to a CSV file.
+    """
+    os.makedirs(config.output_dir, exist_ok=True)
+    output_path = os.path.join(config.output_dir, f"{config.model_name}_forecasts.csv")
+    forecasts.to_csv(output_path, index=False)
+    print(f"Forecasts saved to {output_path}")
+
+
+def diff_inverse_transform(df, first_row, max = 73442.25, min =  41132.5):
+    df_ = first_row.copy()  # Copy to avoid modifying the original
+    for i in range(len(df)):
+        # Compute the row and ensure it's 2D
+        row_values = (max - min)*(df.iloc[[i]].values) + min  # Use last row of df_ for addition
+        row = pd.DataFrame(
+            data=row_values,  # Ensure data is 2D
+            columns=df.columns,
+            index=df.iloc[[i]].index,
+        )
+        
+        # Concatenate instead of appending
+        df_ = pd.concat([df_, row])
+    return df_.iloc[1:]  # Drop the first row if it was only for initialization
+
+
+# main.py file example
+if __name__ == "__main__":
+    # Load dataset
+    dataset = pd.read_csv("Enriched_data.csv")
+    
+    # Define ARIMA Configuration
+    config = ModelConfig(
+        forecast_horizon=24,
+        training_horizon=240,
+        n_splits=5,
+        model_name="HCNN", 
+        output_dir="outputs"
+    )
+
+    # Execute ARIMA Model
+    train_and_forecast(dataset=dataset, config=config)
