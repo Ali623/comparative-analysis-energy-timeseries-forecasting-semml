@@ -174,10 +174,10 @@ cython_debug/
 Dataset
 weather
 map-info
-/final_dataset.csv
 bin
 
 # files
 CRCNN.py
 HCNN.py
 bin.ipynb
+/final_dataset.csv
