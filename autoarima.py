@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 import pandas as pd
 import numpy as np
 from darts import TimeSeries
-from darts.models import ARIMA, RNNModel
+from darts.models import AutoARIMA
 from sklearn.model_selection import TimeSeriesSplit
 import os
 from datetime import datetime
@@ -16,6 +16,7 @@ class ModelConfig(BaseModel):
     model_name: str = Field(..., description="Name of the model")
     output_dir: str = Field(..., description="Directory to save CSV outputs")
     time: int | None = Field(..., description="Execution time for the forecast")
+
 
 def preprocess_data(dataset: pd.DataFrame, config: ModelConfig, is_covariate: bool = False):
     """
@@ -54,10 +55,8 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
     train_size = config.training_horizon
     test_size = config.forecast_horizon
     splits = []
-
     # Start time
     config.time = datetime.now().strftime("%Y-%m-%d_%H-%M")
-
     for i in reversed(range(config.n_splits)):
         train_start = total_length - train_size - test_size - i * test_size
         train_end = train_start + train_size
@@ -79,8 +78,8 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
 
 
         # Dynamically select the model name
-        if config.model_name == "ARIMA":
-            model = ARIMA()
+        if config.model_name == "AutoARIMA":
+            model = AutoARIMA(start_p=10, max_p=24, start_q=1)
             # Fit the model
             model.fit(train)
             forecast = model.predict(config.forecast_horizon)
@@ -96,7 +95,7 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
 
     # Concatenate all forecasts into a single DataFrame
     combined_forecasts = pd.concat(forecasts, axis=0)
-    
+
     combined_forecasts["model_name"] = config.model_name
     combined_forecasts["training_horizon"]  = config.training_horizon
     combined_forecasts["forecast_horizon"]  = config.forecast_horizon
@@ -104,7 +103,6 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
 
     # Save the forecasts
     save_forecast(combined_forecasts, config)
-
 
 def clean_filename(filename):
     return re.sub(r'[<>:"/\\|?*]', '_', filename)
@@ -130,7 +128,7 @@ if __name__ == "__main__":
         forecast_horizon=24,
         training_horizon=720,
         n_splits=5,
-        model_name="ARIMA", 
+        model_name="AutoARIMA", 
         output_dir="outputs",
         time = None
     )
