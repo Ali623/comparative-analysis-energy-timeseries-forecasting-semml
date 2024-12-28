@@ -7,6 +7,8 @@ from tensorflow.keras.layers import LSTM, Bidirectional, Dense
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.optimizers import Adam
+from datetime import datetime
+import re
 
 
 class ModelConfig(BaseModel):
@@ -15,6 +17,7 @@ class ModelConfig(BaseModel):
     n_splits: int = Field(..., description="Number of train-test splits")
     model_name: str = Field(..., description="Name of the model")
     output_dir: str = Field(..., description="Directory to save CSV outputs")
+    time: int | None = Field(..., description="Execution time for the forecast")
 
 
 
@@ -70,6 +73,9 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
 
     model.compile(optimizer=Adam(), loss='mean_squared_error')
 
+    # Start time
+    config.time = datetime.now().strftime("%Y-%m-%d_%H-%M")
+
     # Train the model
     model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
 
@@ -87,6 +93,8 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
     return predictions
 
 
+def clean_filename(filename):
+    return re.sub(r'[<>:"/\\|?*]', '_', filename)
 
 def save_forecast(forecasts: np.ndarray, dataset: pd.DataFrame, config: ModelConfig):
     """
@@ -94,18 +102,24 @@ def save_forecast(forecasts: np.ndarray, dataset: pd.DataFrame, config: ModelCon
     """
     # Get the timestamps from the dataset, assuming the dataset is ordered and contains the 'timestamp' column.
     forecast_timestamps = dataset.iloc[-len(forecasts):].index
+    splits = np.repeat(range(1, int(config.n_splits * 0.3 + 1)), config.forecast_horizon)
     
     # Create a DataFrame for the forecasts and timestamps
     forecast_df = pd.DataFrame({
         'timestamp': forecast_timestamps,
-        'forecast': forecasts  # Ensure the forecast is a 1D array
+        'forecast': forecasts,  # Ensure the forecast is a 1D array
+        'model_name':config.model_name,
+        'split':splits,
+        'training_horizon':config.training_horizon,
+        'forecast_horizon':config.forecast_horizon,
     })
     
     # Ensure output directory exists
     os.makedirs(config.output_dir, exist_ok=True)
     
     # Define the output file path
-    output_path = os.path.join(config.output_dir, f"{config.model_name}_forecasts.csv")
+    start_time = clean_filename(str(config.time))
+    output_path = os.path.join(config.output_dir, f"{config.model_name}_forecasts_TH_{config.training_horizon}_FH_{config.forecast_horizon}_{start_time}.csv")
     
     # Save the DataFrame to a CSV file
     forecast_df.to_csv(output_path, index=False)
@@ -125,7 +139,8 @@ if __name__ == "__main__":
         training_horizon=720,
         n_splits=1440,
         model_name="BiLSTM",
-        output_dir="outputs"
+        output_dir="outputs",
+        time = None
         )
 
     # Execute ARIMA Model

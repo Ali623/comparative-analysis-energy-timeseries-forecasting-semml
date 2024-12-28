@@ -11,6 +11,8 @@ from hcnn.hcnn.loss_functions import LogCosh
 import torch
 import os
 from datetime import datetime, timedelta
+import re
+
 
 class ModelConfig(BaseModel):
     forecast_horizon: int = Field(..., description="Forecasting horizon in hours")
@@ -18,6 +20,7 @@ class ModelConfig(BaseModel):
     n_splits: int = Field(..., description="Number of train-test splits")
     model_name: str = Field(..., description="Name of the model")
     output_dir: str = Field(..., description="Directory to save CSV outputs")
+    time: int | None = Field(..., description="Execution time for the forecast")
 
 
 def preprocess_data(dataset: pd.DataFrame, config: ModelConfig, iteration : int):
@@ -55,6 +58,9 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
 
     combined_forecast = pd.DataFrame()
 
+    # Start time
+    config.time = datetime.now().strftime("%Y-%m-%d_%H-%M")
+
     for i in reversed(range(config.n_splits)):
 
         df, data_train, test, max, min, start_datetime, end_datetime = preprocess_data(dataset, config, iteration = i)
@@ -81,20 +87,32 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
         # Generate the timestamp column with 1-hour resolution
         # Convert the string to a datetime object
         end_datetime = datetime.strptime(end_datetime, "%Y-%m-%d %H:%M:%S")
+
         timestamps = pd.date_range(start=end_datetime, end=end_datetime + timedelta(hours=23) , freq='h')
         df_forecast_test["timestamp"] = timestamps
+        df_forecast_test["split"] = config.n_splits - i
 
         combined_forecast = pd.concat([combined_forecast, df_forecast_test], ignore_index=True)
+    
+
+    combined_forecast["model_name"] = config.model_name
+    combined_forecast["training_horizon"]  = config.training_horizon
+    combined_forecast["forecast_horizon"]  = config.forecast_horizon
+    combined_forecast.columns = ['forecast', 'timestamp',  'split', 'model_name', 'training_horizon', 'forecast_horizon']
 
     # Save the forecasts
-    save_forecast(combined_forecast[["timestamp","forecast"]], config)
+    save_forecast(combined_forecast, config)
+
+def clean_filename(filename):
+    return re.sub(r'[<>:"/\\|?*]', '_', filename)
 
 def save_forecast(forecasts: pd.DataFrame, config: ModelConfig):
     """
     Save the forecast results to a CSV file.
     """
     os.makedirs(config.output_dir, exist_ok=True)
-    output_path = os.path.join(config.output_dir, f"{config.model_name}_forecasts.csv")
+    start_time = clean_filename(str(config.time))
+    output_path = os.path.join(config.output_dir, f"{config.model_name}_forecasts_TH_{config.training_horizon}_FH_{config.forecast_horizon}_{start_time}.csv")
     forecasts.to_csv(output_path, index=False)
     print(f"Forecasts saved to {output_path}")
 
@@ -126,7 +144,8 @@ if __name__ == "__main__":
         training_horizon=240,
         n_splits=5,
         model_name="HCNN", 
-        output_dir="outputs"
+        output_dir="outputs",
+        time = None
     )
 
     # Execute ARIMA Model
