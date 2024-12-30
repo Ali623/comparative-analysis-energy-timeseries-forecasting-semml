@@ -237,10 +237,10 @@ if __name__ == "__main__":
 
     # Define the training horizons for the experiments
     training_horizons = [
-        2 * 7 * 24,  # 2 weeks
-        4 * 7 * 24,  # 4 weeks
-        8 * 7 * 24,  # 8 weeks
-        16 * 7 * 24, # 16 weeks
+        # 2 * 7 * 24,  # 2 weeks
+        # 4 * 7 * 24,  # 4 weeks
+        # 8 * 7 * 24,  # 8 weeks
+        # 16 * 7 * 24, # 16 weeks
         32 * 7 * 24, # 32 weeks
         48 * 7 * 24  # 48 weeks
     ]

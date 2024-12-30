@@ -91,7 +91,7 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
 
 
         # Dynamically select the model name
-        if config.model_name == "AutoARIMA_wFC":
+        if config.model_name == "AutoARIMAwFC":
             model = AutoARIMA(start_p=3, max_p=10, start_q=1)
             # Fit the model
             model.fit(train, future_covariates=future_covariates_train)
@@ -197,7 +197,7 @@ if __name__ == "__main__":
         forecast_horizon=24,
         training_horizon=48*7*24, # 48 weeks
         n_splits=30,
-        model_name="AutoARIMA_wFC", 
+        model_name="AutoARIMAwFC", 
         output_dir="outputs",
         time = None
     )
