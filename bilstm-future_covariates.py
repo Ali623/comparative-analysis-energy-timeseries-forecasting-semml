@@ -222,7 +222,7 @@ if __name__ == "__main__":
     base_config = {
         "forecast_horizon": 24,
         "n_splits": 300,
-        "model_name": "BiLSTM_wFC",
+        "model_name": "BiLSTMwFC",
         "output_dir": "outputs",
         "time": None
     }
