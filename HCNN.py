@@ -65,14 +65,15 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
 
         df, data_train, test, max, min, start_datetime, end_datetime = preprocess_data(dataset, config, iteration = i)
 
-        hcnn = HCNN(data_dim=data_train.shape[1], hidden_dim=200, sparsity=0, init_state_trainable=False)
+        hcnn = HCNN(data_dim=data_train.shape[1], hidden_dim=200, sparsity=0, init_state_trainable=True)
         init_state = hcnn.init_state()
 
         train_loss = hcnn.train(
             data_train.values, 
             init_state, 
             lr=0.0005, epochs=1000, 
-            criterion=torch.nn.MSELoss(), #LogCosh.apply, 
+            criterion=LogCosh.apply, #LogCosh.apply, torch.nn.MSELoss()
+            reduce_lr_epochs = 900, 
             plot_pred_train=False
         )
 
@@ -87,6 +88,7 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
         # Generate the timestamp column with 1-hour resolution
         # Convert the string to a datetime object
         end_datetime = datetime.strptime(end_datetime, "%Y-%m-%d %H:%M:%S")
+        end_datetime -= timedelta(hours=23)
 
         timestamps = pd.date_range(start=end_datetime, end=end_datetime + timedelta(hours=23) , freq='h')
         df_forecast_test["timestamp"] = timestamps
@@ -136,17 +138,112 @@ def diff_inverse_transform(df, first_row, max = 73442.25, min =  41132.5):
 # main.py file example
 if __name__ == "__main__":
     # Load dataset
-    dataset = pd.read_csv("Enriched_data.csv")
+    # dataset = pd.read_csv("Enriched_data.csv")
     
-    # Define ARIMA Configuration
-    config = ModelConfig(
-        forecast_horizon=24,
-        training_horizon=240,
-        n_splits=5,
-        model_name="HCNN", 
-        output_dir="outputs",
-        time = None
-    )
+    # Experiment 1
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=2*7*24, # 2 weeks
+    #     n_splits=30,
+    #     model_name="HCNN", 
+    #     output_dir="outputs",
+    #     time = None
+    # )
 
-    # Execute ARIMA Model
-    train_and_forecast(dataset=dataset, config=config)
+    # Experiment 2
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=4*7*24, # 4 weeks
+    #     n_splits=30,
+    #     model_name="HCNN", 
+    #     output_dir="outputs",
+    #     time = None
+    # )
+
+
+    # Experiment 3
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=8*7*24, # 8 weeks
+    #     n_splits=30,
+    #     model_name="HCNN", 
+    #     output_dir="outputs",
+    #     time = None
+    # )
+
+    # Experiment 4
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=16*7*24, # 16 weeks
+    #     n_splits=30,
+    #     model_name="HCNN", 
+    #     output_dir="outputs",
+    #     time = None
+    # )
+
+
+    # Experiment 5
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=32*7*24, # 32 weeks
+    #     n_splits=30,
+    #     model_name="HCNN", 
+    #     output_dir="outputs",
+    #     time = None
+    # )
+
+    # Experiment 6
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=48*7*24, # 48 weeks
+    #     n_splits=30,
+    #     model_name="HCNN", 
+    #     output_dir="outputs",
+    #     time = None
+    # )
+
+    # Execute hcnn Model
+    # train_and_forecast(dataset=dataset, config=config)
+
+    
+    
+    #### Just to automate the task ####
+    # Define a function to run multiple experiments
+    def run_experiments(base_config, training_horizons):
+        for i, training_horizon in enumerate(training_horizons, start=1):
+            # Update the configuration for each experiment
+            config = ModelConfig(
+                forecast_horizon=base_config["forecast_horizon"],
+                training_horizon=training_horizon,
+                n_splits=base_config["n_splits"],
+                model_name=base_config["model_name"],
+                output_dir=f"{base_config['output_dir']}",
+                time=base_config["time"]
+            )
+
+            print(f"Running Experiment {i} with training horizon: {training_horizon} hours...")
+            # Execute the model
+            dataset = pd.read_csv("Enriched_data.csv")
+            train_and_forecast(dataset=dataset, config=config)
+
+    # Define the base configuration
+    base_config = {
+        "forecast_horizon": 24,
+        "n_splits": 30,
+        "model_name": "HCNN",
+        "output_dir": "outputs",
+        "time": None
+    }
+
+    # Define the training horizons for the experiments
+    training_horizons = [
+        2 * 7 * 24,  # 2 weeks
+        4 * 7 * 24,  # 4 weeks
+        8 * 7 * 24,  # 8 weeks
+        16 * 7 * 24, # 16 weeks
+        32 * 7 * 24, # 32 weeks
+        48 * 7 * 24  # 48 weeks
+    ]
+
+    # Run the experiments
+    run_experiments(base_config, training_horizons)

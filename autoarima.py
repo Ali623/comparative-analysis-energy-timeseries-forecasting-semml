@@ -47,6 +47,11 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
     # Convert TimeSeries to a Pandas DataFrame for compatibility
     series_df = series.pd_dataframe()
 
+    # perform min-max scaling
+    max = series_df.max()
+    min = series_df.min()
+    series_df = (series_df - min)/(max - min)
+
     forecasts = []
 
     
@@ -79,7 +84,7 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
 
         # Dynamically select the model name
         if config.model_name == "AutoARIMA":
-            model = AutoARIMA(start_p=10, max_p=24, start_q=1)
+            model = AutoARIMA(start_p=3, max_p=10, start_q=1)
             # Fit the model
             model.fit(train)
             forecast = model.predict(config.forecast_horizon)
@@ -89,12 +94,16 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
 
         # Save the forecast and timestamps
         forecast_df = forecast.pd_dataframe()
+        # inverse transform
+        forecast_df = (max - min) * (forecast_df) + min
+
         forecast_df.reset_index(inplace=True)  # Ensure the timestamp is in the DataFrame
         forecast_df["split"] = split_no + 1
         forecasts.append(forecast_df)
 
     # Concatenate all forecasts into a single DataFrame
     combined_forecasts = pd.concat(forecasts, axis=0)
+
 
     combined_forecasts["model_name"] = config.model_name
     combined_forecasts["training_horizon"]  = config.training_horizon
@@ -124,10 +133,62 @@ if __name__ == "__main__":
     dataset = pd.read_csv("Enriched_data.csv")
     
     # Define ARIMA Configuration
+
+    # Experiment 1
+    # arima_config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=2*7*24, # 2 weeks
+    #     n_splits=30,
+    #     model_name="AutoARIMA", 
+    #     output_dir="outputs",
+    #     time = None
+    # )
+
+    # Experiment 2
+    # arima_config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=4*7*24, # 4 weeks
+    #     n_splits=30,
+    #     model_name="AutoARIMA", 
+    #     output_dir="outputs",
+    #     time = None
+    # )
+
+    # Experiment 3
+    # arima_config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=8*7*24, # 8 weeks
+    #     n_splits=30,
+    #     model_name="AutoARIMA", 
+    #     output_dir="outputs",
+    #     time = None
+    # )
+
+    # Experiment 4
+    # arima_config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=16*7*24, # 8 weeks
+    #     n_splits=30,
+    #     model_name="AutoARIMA", 
+    #     output_dir="outputs",
+    #     time = None
+    # )
+
+    # Experiment 5
+    # arima_config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=32*7*24, # 32 weeks
+    #     n_splits=30,
+    #     model_name="AutoARIMA", 
+    #     output_dir="outputs",
+    #     time = None
+    # )
+
+    # Experiment 6
     arima_config = ModelConfig(
         forecast_horizon=24,
-        training_horizon=720,
-        n_splits=5,
+        training_horizon=48*7*24, # 48 weeks
+        n_splits=30,
         model_name="AutoARIMA", 
         output_dir="outputs",
         time = None

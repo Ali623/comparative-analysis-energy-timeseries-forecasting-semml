@@ -28,7 +28,7 @@ def preprocess_data(dataset: pd.DataFrame, config: ModelConfig):
 
     # Define the target variable and features
     target_column = 'Actual Load [MW]'
-    feature_columns = ['temperature'] #, 'humidity', 'wind_speed', 'dayofyear', 'dayofmonth', 'dayofweek', 'hour', 'holiday']
+    feature_columns = ['Actual Load [MW]'] #, 'humidity', 'wind_speed', 'dayofyear', 'dayofmonth', 'dayofweek', 'hour', 'holiday']
 
     # Extract features and target variable
     X = dataset[feature_columns]
@@ -64,7 +64,7 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
     X_seq, y_seq = create_sequences(X_scaled, y_scaled, seq_length, target_length)
 
     # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X_seq, y_seq, test_size=0.3, shuffle=False)
+    X_train, X_test, y_train, y_test = train_test_split(X_seq, y_seq, test_size=0.1, shuffle=False)
 
     # Build the LSTM model
     model = Sequential()
@@ -77,7 +77,7 @@ def train_and_forecast(dataset: pd.DataFrame, config: ModelConfig):
     config.time = datetime.now().strftime("%Y-%m-%d_%H-%M")
 
     # Train the model
-    model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test))
+    model.fit(X_train, y_train, epochs=50, batch_size=32, validation_data=(X_test, y_test))
 
     # Make predictions
     predictions_scaled = model.predict(X_test)
@@ -102,7 +102,7 @@ def save_forecast(forecasts: np.ndarray, dataset: pd.DataFrame, config: ModelCon
     """
     # Get the timestamps from the dataset, assuming the dataset is ordered and contains the 'timestamp' column.
     forecast_timestamps = dataset.iloc[-len(forecasts):].index
-    splits = np.repeat(range(1, int(config.n_splits * 0.3 + 1)), config.forecast_horizon)
+    splits = np.repeat(range(1, int(config.n_splits * 0.1 + 1)), config.forecast_horizon)
     
     # Create a DataFrame for the forecasts and timestamps
     forecast_df = pd.DataFrame({
@@ -133,16 +133,108 @@ if __name__ == "__main__":
     # Load the dataset
     dataset = pd.read_csv('Enriched_data.csv')
 
-    # Example usage:
-    config = ModelConfig(
-        forecast_horizon=24,
-        training_horizon=720,
-        n_splits=1440,
-        model_name="BiLSTM",
-        output_dir="outputs",
-        time = None
-        )
+    # Experiment 1
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=2*7*24, # 2 weeks
+    #     n_splits=100,
+    #     model_name="BiLSTM",
+    #     output_dir="outputs",
+    #     time = None
+    #     )
+    
+    # Experiment 2
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=4*7*24, # 4 weeks
+    #     n_splits=100,
+    #     model_name="BiLSTM",
+    #     output_dir="outputs",
+    #     time = None
+    #     )
+    
+    # Experiment 3
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=8*7*24, # 4 weeks
+    #     n_splits=100,
+    #     model_name="BiLSTM",  # or "LSTM"
+    #     output_dir="outputs",
+    #     time = None
+    #     )
+    
+    # Experiment 4
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=16*7*24, # 4 weeks
+    #     n_splits=100,
+    #     model_name="BiLSTM",  # or "LSTM"
+    #     output_dir="outputs",
+    #     time = None
+    #     )
 
-    # Execute ARIMA Model
-    predictions = train_and_forecast(dataset=dataset, config=config)
-    save_forecast(predictions, dataset, config)
+    # Experiment 5
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=32*7*24, # 4 weeks
+    #     n_splits=100,
+    #     model_name="BiLSTM",  # or "LSTM"
+    #     output_dir="outputs",
+    #     time = None
+    #     )
+
+    # Experiment 6
+    # config = ModelConfig(
+    #     forecast_horizon=24,
+    #     training_horizon=48*7*24, # 48 weeks
+    #     n_splits=100,
+    #     model_name="BiLSTM",  # or "LSTM"
+    #     output_dir="outputs",
+    #     time = None
+    #     )
+
+    # Execute bilstm Model
+    # predictions = train_and_forecast(dataset=dataset, config=config)
+    # save_forecast(predictions, dataset, config)
+
+    #### Just to automate the task ####
+    # Define a function to run multiple experiments
+    def run_experiments(base_config, training_horizons):
+        for i, training_horizon in enumerate(training_horizons, start=1):
+            # Update the configuration for each experiment
+            config = ModelConfig(
+                forecast_horizon=base_config["forecast_horizon"],
+                training_horizon=training_horizon,
+                n_splits=base_config["n_splits"],
+                model_name=base_config["model_name"],
+                output_dir=f"{base_config['output_dir']}",
+                time=base_config["time"]
+            )
+
+            print(f"Running Experiment {i} with training horizon: {training_horizon} hours...")
+            # Execute the model
+            dataset = pd.read_csv('Enriched_data.csv')
+            predictions = train_and_forecast(dataset=dataset, config=config)
+            save_forecast(predictions, dataset, config)
+
+    # Define the base configuration
+    base_config = {
+        "forecast_horizon": 24,
+        "n_splits": 300,
+        "model_name": "BiLSTM",
+        "output_dir": "outputs",
+        "time": None
+    }
+
+    # Define the training horizons for the experiments
+    training_horizons = [
+        2 * 7 * 24,  # 2 weeks
+        4 * 7 * 24,  # 4 weeks
+        8 * 7 * 24,  # 8 weeks
+        16 * 7 * 24, # 16 weeks
+        32 * 7 * 24, # 32 weeks
+        48 * 7 * 24  # 48 weeks
+    ]
+
+    # Run the experiments
+    run_experiments(base_config, training_horizons)
