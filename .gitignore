@@ -170,14 +170,15 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# dataset
+# folders
 Dataset
 weather
 map-info
 bin
+hcnn/
+results/outputs/
 
 # files
 CRCNN.py
-HCNN.py
 bin.ipynb
 /final_dataset.csv
