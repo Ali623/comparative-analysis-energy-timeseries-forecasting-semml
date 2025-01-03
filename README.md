@@ -56,6 +56,7 @@ Overall, **BiLSTM** showed the best performance in terms of accuracy and adaptab
 ## How to Use
 
 1. Clone the repository: `git clone https://github.com/your-repo/comparative-analysis-energy-timeseries-forecasting-semml.git`
+2. Clone the repository inside the comparative-analysis-energy-timeseries-forecasting-semml folder: `git clone https://github.com/uselessskills/hcnn?tab=readme-ov-file`
 2. Install dependencies: `pip install -r requirements.txt`
 3. Run the models: `python main.py`
 4. View results in the `results/` folder.

@@ -1,4 +1,7 @@
 import torch
+# Set seeds for reproducibility
+seed = 42
+torch.manual_seed(seed)
 
 
 class LogCosh(torch.autograd.Function):

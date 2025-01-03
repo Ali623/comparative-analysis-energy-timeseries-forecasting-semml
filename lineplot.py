@@ -14,15 +14,15 @@ if __name__ == "__main__":
     # Read Autoarima forecasts
     df_forecast_arima_2w = pd.read_csv(r"outputs\AutoARIMA_forecasts_TH_336_FH_24_2024-12-28_15-39.csv")
     df_forecast_arima_2w.set_index("timestamp", inplace=True)
-    df_forecast_arima_4w = pd.read_csv(r"outputs\AutoARIMA_forecasts_TH_336_FH_24_2024-12-28_15-39.csv")
+    df_forecast_arima_4w = pd.read_csv(r"outputs\AutoARIMA_forecasts_TH_672_FH_24_2024-12-28_15-47.csv")
     df_forecast_arima_4w.set_index("timestamp", inplace=True)
-    df_forecast_arima_8w = pd.read_csv(r"outputs\AutoARIMA_forecasts_TH_336_FH_24_2024-12-28_15-39.csv")
+    df_forecast_arima_8w = pd.read_csv(r"outputs\AutoARIMA_forecasts_TH_1344_FH_24_2024-12-28_18-08.csv")
     df_forecast_arima_8w.set_index("timestamp", inplace=True)
-    df_forecast_arima_16w = pd.read_csv(r"outputs\AutoARIMA_forecasts_TH_336_FH_24_2024-12-28_15-39.csv")
+    df_forecast_arima_16w = pd.read_csv(r"outputs\AutoARIMA_forecasts_TH_2688_FH_24_2024-12-28_18-13.csv")
     df_forecast_arima_16w.set_index("timestamp", inplace=True)
-    df_forecast_arima_32w = pd.read_csv(r"outputs\AutoARIMA_forecasts_TH_336_FH_24_2024-12-28_15-39.csv")
+    df_forecast_arima_32w = pd.read_csv(r"outputs\AutoARIMA_forecasts_TH_5376_FH_24_2024-12-28_18-50.csv")
     df_forecast_arima_32w.set_index("timestamp", inplace=True)
-    df_forecast_arima_48w = pd.read_csv(r"outputs\AutoARIMA_forecasts_TH_336_FH_24_2024-12-28_15-39.csv")
+    df_forecast_arima_48w = pd.read_csv(r"outputs\AutoARIMA_forecasts_TH_8064_FH_24_2024-12-28_19-53.csv")
     df_forecast_arima_48w.set_index("timestamp", inplace=True)
 
 
@@ -85,33 +85,33 @@ if __name__ == "__main__":
     df_forecast_BiLSTM_48w.set_index("timestamp", inplace=True)
 
 
-    # Read LSTM with future covariates forecasts
-    df_forecast_BiLSTM_wFC_2w = pd.read_csv(r"outputs\BiLSTM_wFC_forecasts_TH_336_FH_24_2024-12-29_23-50.csv")
+    # Read BiLSTM with future covariates forecasts
+    df_forecast_BiLSTM_wFC_2w = pd.read_csv(r"outputs\BiLSTMwFC_forecasts_TH_336_FH_24_2024-12-30_20-16.csv")
     df_forecast_BiLSTM_wFC_2w.set_index("timestamp", inplace=True)
-    df_forecast_BiLSTM_wFC_4w = pd.read_csv(r"outputs\BiLSTM_wFC_forecasts_TH_672_FH_24_2024-12-29_23-51.csv")
+    df_forecast_BiLSTM_wFC_4w = pd.read_csv(r"outputs\BiLSTMwFC_forecasts_TH_672_FH_24_2024-12-30_20-17.csv")
     df_forecast_BiLSTM_wFC_4w.set_index("timestamp", inplace=True)
-    df_forecast_BiLSTM_wFC_8w = pd.read_csv(r"outputs\BiLSTM_wFC_forecasts_TH_1344_FH_24_2024-12-29_23-52.csv")
+    df_forecast_BiLSTM_wFC_8w = pd.read_csv(r"outputs\BiLSTMwFC_forecasts_TH_1344_FH_24_2024-12-30_20-18.csv")
     df_forecast_BiLSTM_wFC_8w.set_index("timestamp", inplace=True)
-    df_forecast_BiLSTM_wFC_16w = pd.read_csv(r"outputs\BiLSTM_wFC_forecasts_TH_2688_FH_24_2024-12-29_23-54.csv")
+    df_forecast_BiLSTM_wFC_16w = pd.read_csv(r"outputs\BiLSTMwFC_forecasts_TH_2688_FH_24_2024-12-30_20-21.csv")
     df_forecast_BiLSTM_wFC_16w.set_index("timestamp", inplace=True)
-    df_forecast_BiLSTM_wFC_32w = pd.read_csv(r"outputs\BiLSTM_wFC_forecasts_TH_5376_FH_24_2024-12-29_23-58.csv")
+    df_forecast_BiLSTM_wFC_32w = pd.read_csv(r"outputs\BiLSTMwFC_forecasts_TH_5376_FH_24_2024-12-30_20-28.csv")
     df_forecast_BiLSTM_wFC_32w.set_index("timestamp", inplace=True)
-    df_forecast_BiLSTM_wFC_48w = pd.read_csv(r"outputs\BiLSTM_wFC_forecasts_TH_8064_FH_24_2024-12-30_00-14.csv")
+    df_forecast_BiLSTM_wFC_48w = pd.read_csv(r"outputs\BiLSTMwFC_forecasts_TH_8064_FH_24_2024-12-30_20-51.csv")
     df_forecast_BiLSTM_wFC_48w.set_index("timestamp", inplace=True)
 
 
     # Read HCNN forecasts
-    df_forecast_HCNN_2w = pd.read_csv(r"outputs\HCNN_forecasts_TH_336_FH_24_2024-12-30_01-49.csv")
+    df_forecast_HCNN_2w = pd.read_csv(r"outputs\HCNN_forecasts_TH_336_FH_24_2025-01-02_15-25.csv")
     df_forecast_HCNN_2w.set_index("timestamp", inplace=True)
-    df_forecast_HCNN_4w = pd.read_csv(r"outputs\HCNN_forecasts_TH_336_FH_24_2024-12-30_01-49.csv")
+    df_forecast_HCNN_4w = pd.read_csv(r"outputs\HCNN_forecasts_TH_672_FH_24_2024-12-30_02-49.csv")
     df_forecast_HCNN_4w.set_index("timestamp", inplace=True)
-    df_forecast_HCNN_8w = pd.read_csv(r"outputs\HCNN_forecasts_TH_336_FH_24_2024-12-30_01-49.csv")
+    df_forecast_HCNN_8w = pd.read_csv(r"outputs\HCNN_forecasts_TH_1344_FH_24_2024-12-30_04-47.csv")
     df_forecast_HCNN_8w.set_index("timestamp", inplace=True)
-    df_forecast_HCNN_16w = pd.read_csv(r"outputs\HCNN_forecasts_TH_336_FH_24_2024-12-30_01-49.csv")
+    df_forecast_HCNN_16w = pd.read_csv(r"outputs\HCNN_forecasts_TH_2688_FH_24_2024-12-29_04-55.csv")
     df_forecast_HCNN_16w.set_index("timestamp", inplace=True)
-    df_forecast_HCNN_32w = pd.read_csv(r"outputs\HCNN_forecasts_TH_336_FH_24_2024-12-30_01-49.csv")
+    df_forecast_HCNN_32w = pd.read_csv(r"outputs\HCNN_forecasts_TH_5376_FH_24_2025-01-02_16-35.csv")
     df_forecast_HCNN_32w.set_index("timestamp", inplace=True)
-    df_forecast_HCNN_48w = pd.read_csv(r"outputs\HCNN_forecasts_TH_336_FH_24_2024-12-30_01-49.csv")
+    df_forecast_HCNN_48w = pd.read_csv(r"outputs\HCNN_forecasts_TH_8064_FH_24_2025-01-03_01-14.csv")
     df_forecast_HCNN_48w.set_index("timestamp", inplace=True)
 
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_2w.index, y=df_forecast_LSTM_2w["forecast"], mode='lines', name='LSTM'))
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_wFC_2w.index, y=df_forecast_LSTM_wFC_2w["forecast"], mode='lines', name='LSTM_wFC'))
     fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_2w.index, y=df_forecast_BiLSTM_2w["forecast"], mode='lines', name='BiLSTM'))
-    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_2w.index, y=df_forecast_BiLSTM_wFC_2w["forecast"], mode='lines', name='BiLSTM_wFC'))
+    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_2w.index, y=df_forecast_BiLSTM_wFC_2w["forecast"], mode='lines', name='BiLSTMwFC'))
     fig.add_trace(go.Scatter(x=df_forecast_HCNN_2w.index, y=df_forecast_HCNN_2w["forecast"], mode='lines', name='HCNN'))
 
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_4w.index, y=df_forecast_LSTM_4w["forecast"], mode='lines', name='LSTM'))
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_wFC_4w.index, y=df_forecast_LSTM_wFC_4w["forecast"], mode='lines', name='LSTM_wFC'))
     fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_4w.index, y=df_forecast_BiLSTM_4w["forecast"], mode='lines', name='BiLSTM'))
-    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_4w.index, y=df_forecast_BiLSTM_wFC_4w["forecast"], mode='lines', name='BiLSTM_wFC'))
+    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_4w.index, y=df_forecast_BiLSTM_wFC_4w["forecast"], mode='lines', name='BiLSTMwFC'))
     fig.add_trace(go.Scatter(x=df_forecast_HCNN_4w.index, y=df_forecast_HCNN_4w["forecast"], mode='lines', name='HCNN'))
 
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_8w.index, y=df_forecast_LSTM_8w["forecast"], mode='lines', name='LSTM'))
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_wFC_8w.index, y=df_forecast_LSTM_wFC_8w["forecast"], mode='lines', name='LSTM_wFC'))
     fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_8w.index, y=df_forecast_BiLSTM_8w["forecast"], mode='lines', name='BiLSTM'))
-    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_8w.index, y=df_forecast_BiLSTM_wFC_8w["forecast"], mode='lines', name='BiLSTM_wFC'))
+    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_8w.index, y=df_forecast_BiLSTM_wFC_8w["forecast"], mode='lines', name='BiLSTMwFC'))
     fig.add_trace(go.Scatter(x=df_forecast_HCNN_8w.index, y=df_forecast_HCNN_8w["forecast"], mode='lines', name='HCNN'))
 
 
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_16w.index, y=df_forecast_LSTM_16w["forecast"], mode='lines', name='LSTM'))
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_wFC_16w.index, y=df_forecast_LSTM_wFC_16w["forecast"], mode='lines', name='LSTM_wFC'))
     fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_16w.index, y=df_forecast_BiLSTM_16w["forecast"], mode='lines', name='BiLSTM'))
-    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_16w.index, y=df_forecast_BiLSTM_wFC_16w["forecast"], mode='lines', name='BiLSTM_wFC'))
+    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_16w.index, y=df_forecast_BiLSTM_wFC_16w["forecast"], mode='lines', name='BiLSTMwFC'))
     fig.add_trace(go.Scatter(x=df_forecast_HCNN_16w.index, y=df_forecast_HCNN_16w["forecast"], mode='lines', name='HCNN'))
 
 
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_32w.index, y=df_forecast_LSTM_32w["forecast"], mode='lines', name='LSTM'))
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_wFC_32w.index, y=df_forecast_LSTM_wFC_32w["forecast"], mode='lines', name='LSTM_wFC'))
     fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_32w.index, y=df_forecast_BiLSTM_32w["forecast"], mode='lines', name='BiLSTM'))
-    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_32w.index, y=df_forecast_BiLSTM_wFC_32w["forecast"], mode='lines', name='BiLSTM_wFC'))
+    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_32w.index, y=df_forecast_BiLSTM_wFC_32w["forecast"], mode='lines', name='BiLSTMwFC'))
     fig.add_trace(go.Scatter(x=df_forecast_HCNN_32w.index, y=df_forecast_HCNN_32w["forecast"], mode='lines', name='HCNN'))
 
 
@@ -180,7 +180,7 @@ if __name__ == "__main__":
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_48w.index, y=df_forecast_LSTM_48w["forecast"], mode='lines', name='LSTM'))
     fig.add_trace(go.Scatter(x=df_forecast_LSTM_wFC_48w.index, y=df_forecast_LSTM_wFC_48w["forecast"], mode='lines', name='LSTM_wFC'))
     fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_48w.index, y=df_forecast_BiLSTM_48w["forecast"], mode='lines', name='BiLSTM'))
-    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_48w.index, y=df_forecast_BiLSTM_wFC_48w["forecast"], mode='lines', name='BiLSTM_wFC'))
+    fig.add_trace(go.Scatter(x=df_forecast_BiLSTM_wFC_48w.index, y=df_forecast_BiLSTM_wFC_48w["forecast"], mode='lines', name='BiLSTMwFC'))
     fig.add_trace(go.Scatter(x=df_forecast_HCNN_48w.index, y=df_forecast_HCNN_48w["forecast"], mode='lines', name='HCNN'))
 
 
@@ -287,6 +287,6 @@ if __name__ == "__main__":
     ])
 
     # Save the plot as an HTML file
-    fig.write_html(f"results/lineplots/lineplot_model_comparison.html")
+    fig.write_html(f"results/lineplot_model_comparison.html")
     # Show Fig
     fig.show()
