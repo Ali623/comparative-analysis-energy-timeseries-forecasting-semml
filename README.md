@@ -28,17 +28,17 @@ This enriched dataset provides a robust foundation for building models that can 
 
 Below are the visual summaries of the results:
 
-### Line Graph
-
-
-- **Description:** A comparison of actual vs. predicted energy values for all models over the evaluation period.
-
 ### Box Plot
 
 - **Description:** A statistical distribution of the prediction errors (e.g., MAE, RMSE) for each model.
 
+![boxplot](results\boxplot.png)
 
+### Line Graph
 
+- **Description:** A comparison of actual vs. predicted energy values for all models over the evaluation period.
+
+![Lineplot](results\lineplot.png)
 
 ---
 
