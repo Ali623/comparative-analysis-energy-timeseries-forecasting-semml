@@ -32,13 +32,13 @@ Below are the visual summaries of the results:
 
 - **Description:** A statistical distribution of the prediction errors (e.g., MAE, RMSE) for each model.
 
-![boxplot](results\boxplot.png)
+![boxplot](https://github.com/Ali623/comparative-analysis-energy-timeseries-forecasting-semml/blob/main/results/boxplot.png)
 
 ### Line Graph
 
 - **Description:** A comparison of actual vs. predicted energy values for all models over the evaluation period.
 
-![Lineplot](results\lineplot.png)
+![Lineplot](https://github.com/Ali623/comparative-analysis-energy-timeseries-forecasting-semml/blob/main/results/lineplot.png)
 
 ---
 
