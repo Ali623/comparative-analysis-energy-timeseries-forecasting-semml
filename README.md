@@ -4,10 +4,10 @@
 
 This research focuses on a comparative study of machine learning and deep learning models for energy time series forecasting. The study evaluates and contrasts the performance of the following models:
 
-- **ARIMA** (Auto-Regressive Integrated Moving Average)
-- **LSTM** (Long Short-Term Memory)
+- **ARIMA w/wo Future covariates** (Auto-Regressive Integrated Moving Average)
+- **LSTM w/wo Future covariates** (Long Short-Term Memory)
 - **HCNN** (Historically Consistent Neural Networks)
-- **BiLSTM** (Bidirectional Long Short-Term Memory)
+- **BiLSTM w/wo Future covariates** (Bidirectional Long Short-Term Memory)
 
 The aim is to identify the strengths and weaknesses of each model in predicting energy requirements based on historical data.
 
