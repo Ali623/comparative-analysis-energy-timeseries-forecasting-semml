@@ -30,7 +30,7 @@ Below are the visual summaries of the results:
 
 ### Box Plot
 
-- **Description:** A statistical distribution of the prediction errors (e.g., MAE, RMSE) for each model.
+- **Description:** A statistical distribution of the prediction errors (e.g., Normalized MAE) for each model.
 
 ![boxplot](https://github.com/Ali623/comparative-analysis-energy-timeseries-forecasting-semml/blob/main/results/boxplot.png)
 
